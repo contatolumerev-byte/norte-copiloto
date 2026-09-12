@@ -22,17 +22,20 @@ function loadProfile(): Profile | null {
 }
 
 export default function App() {
-  const [profile, setProfile] = useState<Profile>(() => loadProfile() ?? initialProfile)
-  const [step, setStep] = useState(() => (loadProfile() ? questions.length : 0))
-  const [selectedPriorities, setSelectedPriorities] = useState<string[]>(() => loadProfile()?.priorities ?? [])
+  const stored = loadProfile()
+  const [profile, setProfile] = useState<Profile>(() => stored ?? initialProfile)
+  const [step, setStep] = useState(() => stored ? questions.length + 1 : 0)
+  const [selectedPriorities, setSelectedPriorities] = useState<string[]>(() => stored?.priorities ?? [])
   const [text, setText] = useState('')
+  const [started, setStarted] = useState(() => Boolean(stored?.priorities?.length))
 
-  const completed = step >= questions.length
+  const showingQuestions = step < questions.length
+  const showingPriorities = !started
   const decision = useMemo(() => decideNextAction({ ...profile, priorities: selectedPriorities }), [profile, selectedPriorities])
 
   useEffect(() => {
-    if (completed) localStorage.setItem('norte-profile', JSON.stringify({ ...profile, priorities: selectedPriorities }))
-  }, [completed, profile, selectedPriorities])
+    if (started) localStorage.setItem('norte-profile', JSON.stringify({ ...profile, priorities: selectedPriorities }))
+  }, [started, profile, selectedPriorities])
 
   const answer = () => {
     const question = questions[step]
@@ -46,15 +49,20 @@ export default function App() {
     setSelectedPriorities((current) => current.includes(priority) ? current.filter((item) => item !== priority) : [...current, priority].slice(0, 3))
   }
 
+  const finishPriorities = () => {
+    if (selectedPriorities.length > 0) setStarted(true)
+  }
+
   const reset = () => {
     localStorage.removeItem('norte-profile')
     setProfile(initialProfile)
     setSelectedPriorities([])
     setStep(0)
+    setStarted(false)
     setText('')
   }
 
-  if (!completed) {
+  if (showingQuestions) {
     const question = questions[step]
     return (
       <main className="page centered">
@@ -72,7 +80,7 @@ export default function App() {
     )
   }
 
-  if (selectedPriorities.length === 0) {
+  if (showingPriorities) {
     return (
       <main className="page centered">
         <section className="onboarding card">
@@ -80,14 +88,12 @@ export default function App() {
           <p className="eyebrow">Mais uma coisa</p>
           <h1>O que importa mais para você agora?</h1>
           <p className="hint">Escolha até três. Isso não é definitivo; o Norte vai aprender com você.</p>
-          <div className="chips">{priorities.map((item) => <button className="chip" key={item} onClick={() => togglePriority(item)}>{item}</button>)}</div>
-          <button disabled={selectedPriorities.length === 0} onClick={() => setSelectedPriorities((current) => [...current])}>Começar</button>
+          <div className="chips">{priorities.map((item) => <button className={`chip ${selectedPriorities.includes(item) ? 'selected' : ''}`} key={item} onClick={() => togglePriority(item)}>{item}</button>)}</div>
+          <button disabled={selectedPriorities.length === 0} onClick={finishPriorities}>Começar</button>
         </section>
       </main>
     )
   }
-
-  const savedProfile = { ...profile, priorities: selectedPriorities }
 
   return (
     <main className="page">
@@ -98,10 +104,10 @@ export default function App() {
         <p className="lead">Eu não vou tentar organizar sua vida inteira. Primeiro, vamos entender o que está acontecendo e escolher o próximo passo.</p>
       </section>
       <section className="grid">
-        <article className="card agent"><span className="label">Norte agora</span><p>{decision.message}</p><button onClick={() => alert('Próximo passo: conectar esta decisão ao loop real do agente.')}>Conversar sobre isso</button></article>
-        <article className="card"><span className="label">O que importa</span><div className="chips">{savedProfile.priorities.map((item) => <span className="tag" key={item}>{item}</span>)}</div></article>
-        <article className="card"><span className="label">O que você quer mudar</span><p>{savedProfile.desiredChange || 'Ainda vamos descobrir.'}</p></article>
-        <article className="card"><span className="label">O que está difícil</span><p>{savedProfile.difficulty || 'Ainda vamos descobrir.'}</p></article>
+        <article className="card agent"><span className="label">Norte agora</span><p>{decision.message}</p><button onClick={() => window.alert('A conversa com o agente será conectada ao loop real na próxima etapa.')}>Conversar sobre isso</button></article>
+        <article className="card"><span className="label">O que importa</span><div className="chips">{selectedPriorities.map((item) => <span className="tag" key={item}>{item}</span>)}</div></article>
+        <article className="card"><span className="label">O que você quer mudar</span><p>{profile.desiredChange || 'Ainda vamos descobrir.'}</p></article>
+        <article className="card"><span className="label">O que está difícil</span><p>{profile.difficulty || 'Ainda vamos descobrir.'}</p></article>
       </section>
       <p className="footer-note">Este é o primeiro retrato. Ele pode mudar conforme o Norte aprende com a vida real.</p>
     </main>
