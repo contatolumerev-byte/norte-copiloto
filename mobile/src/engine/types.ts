@@ -33,6 +33,13 @@ export type PersonModel = {
   ineffectiveStrategies: string[]
   goals: Goal[]
   hypotheses: Hypothesis[]
+  functionalProfile: {
+    initiation: number
+    decisionMaking: number
+    transitions: number
+    predictabilityPreference: number
+    preferredInput: 'voice' | 'text' | 'quick_choices'
+  }
 }
 
 export type CurrentState = {
