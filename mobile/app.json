@@ -18,11 +18,6 @@
       "package": "com.lumerev.norte",
       "permissions": ["RECORD_AUDIO"]
     },
-    "plugins": ["expo-speech"],
-    "extra": {
-      "eas": {
-        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
-      }
-    }
+    "plugins": ["expo-speech"]
   }
 }
