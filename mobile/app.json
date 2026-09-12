@@ -1,0 +1,28 @@
+{
+  "expo": {
+    "name": "Norte",
+    "slug": "norte",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "scheme": "norte",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.lumerev.norte",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "O Norte usa o microfone para conversar com você por voz.",
+        "NSSpeechRecognitionUsageDescription": "O Norte usa reconhecimento de fala para entender suas respostas durante conversas por voz."
+      }
+    },
+    "android": {
+      "package": "com.lumerev.norte",
+      "permissions": ["RECORD_AUDIO"]
+    },
+    "plugins": ["expo-speech"],
+    "extra": {
+      "eas": {
+        "projectId": "REPLACE_WITH_EAS_PROJECT_ID"
+      }
+    }
+  }
+}
